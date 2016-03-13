@@ -17,6 +17,8 @@ class MyThread(threading.Thread):
 
     #questa funzione viene eseguita automaticamente quando viene fatto lo start() del thread
     def run(self):
+        db_conn = sqlite3.connect('napster.db')
+        cursor = db_conn.cursor()
         logging.debug('Connesso al client con: '+str(self.ip)+' e porta: '+str(self.porta))
         
         while True:
@@ -35,23 +37,23 @@ class MyThread(threading.Thread):
             dir_response=''
             if command=="LOGI":
                 lock.acquire()
-                dir_response=login(peer_request[4:64])
+                dir_response=login(peer_request[4:64], db_conn, cursor)
                 lock.release()
             elif command=="ADDF" and valid_sid(sid):
                 lock.acquire()
-                dir_response=add_file(peer_request[4:136],self.ip,self.porta)
+                dir_response=add_file(peer_request[4:136],self.ip,self.porta,db_conn, cursor)
                 lock.release()
             elif command=="DELF" and valid_sid(sid):
                 lock.acquire()
-                dir_response=delete_file(peer_request[4:36])
+                dir_response=delete_file(peer_request[4:36],db_conn, cursor)
                 lock.release()
             elif command=="FIND" and valid_sid(sid):
                 lock.acquire()
-                dir_response=search_file(peer_request[4:40])
+                dir_response=search_file(peer_request[4:40],db_conn, cursor)
                 lock.release()
             elif command=="DREG" and valid_sid(sid):
                 lock.acquire()
-                dir_response=notify_dowload(peer_request[4:36])
+                dir_response=notify_dowload(peer_request[4:36],db_conn, cursor)
                 lock.release()
             elif command=="LOGO":
                 lock.acquire()
